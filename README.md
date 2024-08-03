@@ -26,6 +26,9 @@ Valid Parameters:
   power_mng.soc_min - Min SOC target
     Valid Range: 0.00 to 1.00, with at most two decimal places
     Default Value: 0.07
+  power_mng.soc_max - Max SOC target
+    Valid Range: 0.00 to 1.00, with at most two decimal places
+    Default Value: 0.97
   power_mng.soc_charge_power - Charging power to reach SOC target
     Default Value: 100
   power_mng.soc_charge - Trigger for charging to SOC_min
