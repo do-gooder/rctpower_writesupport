@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 
-
-## power_mng.soc_strategy		0: SOC-Ziel = SOC, 1: Konstant, 2: Extern, 3: Mittlere Batteriespannung, 4: Intern, 5: Zeitplan (default: 4)
-## power_mng.soc_target_set		Force SOC target (default: 0.5) --> (1: Konstant)
+## power_mng.soc_strategy		    0: SOC-Ziel = SOC, 1: Konstant, 2: Extern, 3: Mittlere Batteriespannung, 4: Intern, 5: Zeitplan (default: 4)
+## power_mng.soc_target_set		    Force SOC target (default: 0.5) --> (1: Konstant)
 ## power_mng.battery_power_extern	Battery target power (positive = discharge) --> (2. Extern)
 
 ## power_mng.soc_min			Min SOC target (default 0.07) --> ggf. als Ersatzstrom-Reserve
-## power_mng.soc_charge_power		Charging to power_mng.soc_min with given W (default: 100)
+## power_mng.soc_max			Max SOC target (default 0.97) --> ggf. zur Begrenzung des Max.-Ladezustandes
+## power_mng.soc_charge_power	Charging to power_mng.soc_min with given W (default: 100)
 ## power_mng.soc_charge			Trigger for charing to soc_min (default: 0.05)
-
 
 import sys
 import socket
@@ -42,6 +41,9 @@ def show_help():
     print("  power_mng.soc_min - Min SOC target")
     print("    Valid Range: 0.00 to 1.00, with at most two decimal places")
     print("    Default Value: 0.07")
+    print("  power_mng.soc_max - Max SOC target")
+    print("    Valid Range: 0.00 to 1.00, with at most two decimal places")
+    print("    Default Value: 0.97")
     print("  power_mng.soc_charge_power - Charging power to reach SOC target")
     print("    Default Value: 100")
     print("  power_mng.soc_charge - Trigger for charging to SOC_min")
@@ -53,6 +55,7 @@ def set_value(parameter, value, host):
         "power_mng.soc_target_set",
         "power_mng.battery_power_extern",
         "power_mng.soc_min",
+        "power_mng.soc_max",
         "power_mng.soc_charge_power",
         "power_mng.soc_charge"
     ]
@@ -100,6 +103,15 @@ def set_value(parameter, value, host):
             print(f"Error: Invalid value '{value}' for parameter '{parameter}'.")
             show_help()
             sys.exit(1)
+    elif parameter == "power_mng.soc_max":
+        try:
+            value = float(value)
+            if not (0.00 <= value <= 1.00) or len(str(value).split(".")[1]) > 2:
+                raise ValueError
+        except ValueError:
+            print(f"Error: Invalid value '{value}' for parameter '{parameter}'.")
+            show_help()
+            sys.exit(1)
     elif parameter in ["power_mng.soc_charge_power", "power_mng.soc_charge"]:
         try:
             value = float(value)
@@ -128,6 +140,7 @@ def get_value(parameter, host):
         "power_mng.soc_strategy",
         "power_mng.soc_target_set",
         "power_mng.battery_power_extern",
+        "power_mng.soc_max",
         "power_mng.soc_min",
         "power_mng.soc_charge_power",
         "power_mng.soc_charge"
