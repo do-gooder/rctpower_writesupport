@@ -49,3 +49,7 @@ Valid Parameters:
   power_mng.soc_charge - Trigger for charging to SOC_min
     Default Value: 0.05
 ```
+
+## Links
+[Special RCT Infos](https://www.photovoltaikforum.com/thread/159603-rct-power-storage-soc-zielauswahl-extern-nutzen/?postID=2656687#post2656687)
+[Starting on Page 32](https://www.rct-power.com/de/download-bereich-de.html?file=files/Download-Bereich/Download%20Bereich%20EN/3.1_RCT%20Power%20Storage%20DC%208-10/RCT-Power-Storage-DC10_Manual_Web24V1EN.pdf)
