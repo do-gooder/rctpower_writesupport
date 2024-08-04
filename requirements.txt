@@ -1,0 +1,4 @@
+# requirements.txt
+
+click==8.1.7
+rctclient==0.0.3
