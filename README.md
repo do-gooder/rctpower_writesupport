@@ -1,6 +1,21 @@
 # rctpower_writesupport
 Write support for RCT Power Serial Protocol with rctclient
 
+## Scenarios
+
+### Charging from the grid for e.g. Tibber
+1. Set ``power_mng.soc_strategy`` to 2
+2. Set ``power_mng.battery_power_external`` to the desired charging power (e.g. -6000 = 6 kW)
+3. Wait until SOC target is reached
+4. Set ``power_mng.soc_strategy`` to 4
+5. Set ``power_mng.battery_power_extern`` to 0
+
+### Discharge lock during e-car charging
+1. Set ``power_mng.soc_strategy`` to 2
+2. Set ``power_mng.battery_power_external`` to 0
+3. Wait as long as the car is charging
+4. Set ``power_mng.soc_strategy`` to 4
+
 ## Usage
 ```
 rct.py get <parameter> --host=<ip_address_or_hostname>
