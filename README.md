@@ -2,6 +2,7 @@
 
 Write support for RCT Power Serial Protocol with rctclient
 
+**Important: For safety reasons, there should be no other connections to the inverter (RCT Power App, HA Integration, OpenWB, EVCC etc.)**
 
 ## Scenarios
 
