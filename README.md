@@ -26,12 +26,12 @@ Write support for RCT Power Serial Protocol with rctclient
 To adjust the available emergency power reserve for the dark season, the value ``power_mng.soc_min`` can be increased. You should then also increase ``power_mng.soc_charge`` in order to recharge from the grid to maintain ``power_mng.soc_min``.
 
 Increase:
-1. Set ``power_mng.soc_min`` to 0.30
-2. Set ``power_mng.soc_charge`` to 0.28
+1. Set ``power_mng.soc_min`` to 0.30 (for 30%)
+2. Set ``power_mng.soc_charge`` to 0.28 (for 28%)
 
 Set to default:
-1. Set ``power_mng.soc_min`` to 0.07
-2. Set ``power_mng.soc_charge`` to 0.05
+1. Set ``power_mng.soc_min`` to 0.07 (for 7%)
+2. Set ``power_mng.soc_charge`` to 0.05 (for 5%)
 
 ## Usage
 ```
