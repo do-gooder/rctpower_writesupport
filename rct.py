@@ -133,7 +133,8 @@ def set_value(parameter, value, host):
     sock.send(send_frame)
     sock.close()
 
-    print(f"Setting value {value} for parameter {parameter} on host {host}")
+    output = "Setting value " + str(value) + " for parameter " + parameter + " on host " + host
+    return output
 
 def get_value(parameter, host):
     valid_parameters = [
@@ -184,8 +185,8 @@ def get_value(parameter, host):
 
     sock.close()
 
-    #print(f"The decoded value for '{parameter}' on host {host} is: {decoded_value}")
-    print(f"{decoded_value}")
+    output = decoded_value
+    return output
 
 # Main script logic
 if __name__ == "__main__":
@@ -212,13 +213,15 @@ if __name__ == "__main__":
             print("Error: Please provide a parameter, a value, and a host to set.")
             show_help()
             sys.exit(1)
-        set_value(sys.argv[2], sys.argv[3], host)
+        output = set_value(sys.argv[2], sys.argv[3], host)
+        print(output)
     elif subcommand == "get":
         if len(sys.argv) != 4:
             print("Error: Please provide a parameter and a host to get.")
             show_help()
             sys.exit(1)
-        get_value(sys.argv[2], host)
+        output = get_value(sys.argv[2], host)
+        print(output)
     else:
         print(f"Error: Unknown command '{subcommand}'.")
         show_help()
