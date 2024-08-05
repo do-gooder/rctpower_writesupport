@@ -9,6 +9,7 @@
 ## power_mng.soc_charge_power	Charging to power_mng.soc_min with given W (default: 100)
 ## power_mng.soc_charge			Trigger for charing to soc_min (default: 0.05)
 
+## Imports
 import sys
 import os
 import socket
@@ -36,6 +37,7 @@ if testing_mode == True:
 elif testing_mode == False:
     args = sys.argv
 
+## Help Function
 def show_help():
     print("Usage:")
     print("  rct.py get <parameter> --host=<ip_address_or_hostname>")
@@ -68,6 +70,7 @@ def show_help():
     print("  power_mng.soc_charge - Trigger for charging to SOC_min")
     print("    Default Value: 0.05")
 
+## Write/Set Function
 def set_value(parameter, value, host):
     valid_parameters = [
         "power_mng.soc_strategy",
@@ -155,6 +158,7 @@ def set_value(parameter, value, host):
     output = "Setting value " + str(value) + " for parameter " + parameter + " on host " + host
     return output
 
+## Read/Get Function
 def get_value(parameter, host):
     valid_parameters = [
         "power_mng.soc_strategy",
@@ -207,7 +211,7 @@ def get_value(parameter, host):
     output = decoded_value
     return output
 
-# Main script logic
+## Main Function
 if __name__ == "__main__":
     if len(args) < 4 or args[1] in ("-h", "--help"):
         show_help()
