@@ -10,12 +10,31 @@
 ## power_mng.soc_charge			Trigger for charing to soc_min (default: 0.05)
 
 import sys
+import os
 import socket
 import select
 from rctclient.frame import make_frame, ReceiveFrame
 from rctclient.registry import REGISTRY
 from rctclient.types import Command
 from rctclient.utils import decode_value, encode_value
+
+## Testing Mode
+# (set to True to use the testing_string as arguments)
+# (activate for testing/debugging only and do not forget to deactivate!)
+# (if command line arguments are passed while testing mode activated, the testing mode will be ignored)
+testing_mode   = False
+testing_string = 'get power_mng.soc_max --host=192.168.0.99'
+
+if testing_mode == True:
+    if len(sys.argv) < 2:
+        print('Testing mode activated. Do not forget to deactivate after testing/debugging!')
+        args = testing_string.split()
+        args.insert(0, os.path.basename(sys.argv[0]))
+    else:
+        print('Testing mode activated, but command line arguments provided! Skipping testing and using provided arguments!')
+        args = sys.argv
+elif testing_mode == False:
+    args = sys.argv
 
 def show_help():
     print("Usage:")
@@ -190,15 +209,15 @@ def get_value(parameter, host):
 
 # Main script logic
 if __name__ == "__main__":
-    if len(sys.argv) < 4 or sys.argv[1] in ("-h", "--help"):
+    if len(args) < 4 or args[1] in ("-h", "--help"):
         show_help()
         sys.exit(1)
 
-    subcommand = sys.argv[1]
+    subcommand = args[1]
     host = None
 
     # Durchlaufe die Argumente, um die Host-Adresse zu extrahieren
-    for arg in sys.argv[2:]:
+    for arg in args[2:]:
         if arg.startswith("--host="):
             host = arg[len("--host="):]
             break
@@ -209,18 +228,18 @@ if __name__ == "__main__":
         sys.exit(1)
 
     if subcommand == "set":
-        if len(sys.argv) != 5:
+        if len(args) != 5:
             print("Error: Please provide a parameter, a value, and a host to set.")
             show_help()
             sys.exit(1)
-        output = set_value(sys.argv[2], sys.argv[3], host)
+        output = set_value(args[2], args[3], host)
         print(output)
     elif subcommand == "get":
-        if len(sys.argv) != 4:
+        if len(args) != 4:
             print("Error: Please provide a parameter and a host to get.")
             show_help()
             sys.exit(1)
-        output = get_value(sys.argv[2], host)
+        output = get_value(args[2], host)
         print(output)
     else:
         print(f"Error: Unknown command '{subcommand}'.")
