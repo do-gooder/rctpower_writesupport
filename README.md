@@ -81,11 +81,11 @@ This is an elementary example, how the script could be used within Homeassistant
 Afterwards, the integration is available:
 ![image](https://github.com/user-attachments/assets/314d502f-8c25-4060-8a71-ca270dd27f2b)
 Within the the integration settings, make sure that all imports of all packackes is allowed:
-![image](<Bildschirmfoto 2024-08-07 um 08.56.24.png>)
+![image](<images/Bildschirmfoto 2024-08-07 um 08.56.24.png>)
 Hint: The internal integration "Python Scripts" of Home Assistant is not sufficient, because it is not possible to use Python imports with this integration. 
 Refer to: [Home Assistant | Integrations | Python Scripts](https://www.home-assistant.io/integrations/python_script/). <br><br>
 The integration should be ready for use, if basics Pyscript services are provided like this:
-![image](<Bildschirmfoto 2024-08-07 um 09.13.11.png>)
+![image](<images/Bildschirmfoto 2024-08-07 um 09.13.11.png>)
 
 ### Implementation as Service
 First, set up the follwing folders in the config folder of Home Assistant and copy the files "rct.py" and "rct_ha_call.py" from this repository to the folders:
@@ -115,7 +115,7 @@ In this case, I just want to use to **set** the parameter of **power_mng.soc_max
 
 ### Testing
 Now, the service "rct_ha_call" should be available and the `value: 0.97` is the data supplied to the service as the maximum state of charge:
-![image](<Bildschirmfoto 2024-08-07 um 09.35.41.png>)
+![image](<images/Bildschirmfoto 2024-08-07 um 09.35.41.png>)
 
 ### Usage
 Just my implementation for usage as an example:
