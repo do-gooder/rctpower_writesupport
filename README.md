@@ -4,6 +4,11 @@ Write support for RCT Power Serial Protocol with rctclient
 
 **Important: For safety reasons, there should be no other connections to the inverter (RCT Power App, HA Integration, OpenWB, EVCC etc.)**
 
+**Also important: This is an experimental tool and therefore not function nor dangerous conditions or damage to the controlled system can be excluded. All risk lies on the owner of the equipment!** <br> 
+
+Refer also to: [rctclient | write support](https://rctclient.readthedocs.io/en/latest/cli_write_support.html)**
+
+
 ## Scenarios
 
 ### Charging from the grid for e.g. Tibber
@@ -68,9 +73,25 @@ Valid Parameters:
     Default Value: 0.05
 ```
 
+## Homeassistant Integration
+This is an elementary example, how the script could be used within Homeassistant.
+
+### Preperations
+1. Install pyscript according to the installation instructions from this [documentation](https://hacs-pyscript.readthedocs.io/en/stable/installation.html).
+Afterwards, the integration is available:
+
+### Implementation as Service
+
+### Usage
+
+
 ## Links
+[Rctclient's documentation](https://rctclient.readthedocs.io/en/latest/index.html)
+
 [Special RCT Infos](https://www.photovoltaikforum.com/thread/159603-rct-power-storage-soc-zielauswahl-extern-nutzen/?postID=2656687#post2656687)
 
 [Starting on Page 32](https://www.rct-power.com/de/download-bereich-de.html?file=files/Download-Bereich/Download%20Bereich%20EN/3.1_RCT%20Power%20Storage%20DC%208-10/RCT-Power-Storage-DC10_Manual_Web24V1EN.pdf)
 
 [HF-A21-SMT, Chapter 1.4.3](https://ptelectronics.ru/wp-content/uploads/HF-A21-SMT-User-Manual-V1.120150203.pdf)
+
+[Pyscript: Python Scripting for Home Assistant | Documentation](https://hacs-pyscript.readthedocs.io/en/stable/)
