@@ -6,7 +6,7 @@ Write support for RCT Power Serial Protocol with rctclient
 
 **Also important: This is an experimental tool and therefore not function nor dangerous conditions or damage to the controlled system can be excluded. All risk lies on the owner of the equipment!** <br> 
 
-Refer also to: [rctclient | write support](https://rctclient.readthedocs.io/en/latest/cli_write_support.html)**
+Refer also to: [rctclient | write support](https://rctclient.readthedocs.io/en/latest/cli_write_support.html)
 
 
 ## Scenarios
