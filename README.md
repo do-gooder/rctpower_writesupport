@@ -79,6 +79,7 @@ This is an elementary example, how the script could be used within Homeassistant
 ### Preperations
 1. Install pyscript according to the installation instructions from this [documentation](https://hacs-pyscript.readthedocs.io/en/stable/installation.html).
 Afterwards, the integration is available:
+![image](https://github.com/user-attachments/assets/314d502f-8c25-4060-8a71-ca270dd27f2b)
 
 ### Implementation as Service
 
