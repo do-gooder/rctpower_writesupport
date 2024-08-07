@@ -77,9 +77,15 @@ Valid Parameters:
 This is an elementary example, how the script could be used within Homeassistant.
 
 ### Preperations
-1. Install pyscript according to the installation instructions from this [documentation](https://hacs-pyscript.readthedocs.io/en/stable/installation.html).
+1. Install pyscript according to the installation instructions from this [documentation](https://hacs-pyscript.readthedocs.io/en/stable/installation.html).<br>
 Afterwards, the integration is available:
 ![image](https://github.com/user-attachments/assets/314d502f-8c25-4060-8a71-ca270dd27f2b)
+Within the the integration settings, make sure that all imports of all packackes is allowed:
+![image](<Bildschirmfoto 2024-08-07 um 08.56.24.png>)
+Hint: The internal integration "Python Scripts" of Home Assistant is not sufficient, because it is not possible to use Python imports with this integration. 
+Refer to: [Home Assistant | Integrations | Python Scripts](https://www.home-assistant.io/integrations/python_script/). <br><br>
+The integration should be ready for use, if basics Pyscript services are provided like this:
+![image](<Bildschirmfoto 2024-08-07 um 09.13.11.png>)
 
 ### Implementation as Service
 
