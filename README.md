@@ -21,6 +21,7 @@ Refer also to: [rctclient | write support](https://rctclient.readthedocs.io/en/l
 
 
 ### Discharge lock during e-car charging
+This also prevents excess charging. The battery is therefore not used at all.
 
 1. Set ``power_mng.soc_strategy`` to 2
 2. Set ``power_mng.battery_power_external`` to 0
