@@ -1,0 +1,49 @@
+input_number:
+  rct_soc_max:
+    name: Max SOC target
+    # ToDo: Read inital value when HA starts
+    initial: 97
+    # ToDo: Find a good min-value (gt rct_soc_min)
+    min: 30
+    max: 97
+    step: 1
+    unit_of_measurement: "%"
+    icon: "mdi:battery-high"
+
+  rct_soc_min:
+    name: Min SOC target
+    # ToDo: Read inital value when HA starts
+    initial: 7
+    min: 7
+    # ToDo: Find a good max-value (lt rct_soc_max)
+    max: 50
+    step: 1
+    unit_of_measurement: "%"
+    icon: "mdi:battery-low"
+
+
+automation:
+  - alias: "set_rct_soc_max"
+    trigger:
+      platform: state
+      entity_id: input_number.rct_soc_max
+    action:
+      - action: shell_command.writerctpower
+        data:
+          object_name: "power_mng.soc_max"
+          object_value: "{{states('input_number.rct_soc_max')|multiply(0.01)|round(2)}}"
+    mode: queued
+  - alias: "set_rct_soc_min"
+    trigger:
+      platform: state
+      entity_id: input_number.rct_soc_min
+    action:
+      - action: shell_command.writerctpower
+        data:
+          object_name: "power_mng.soc_min"
+          object_value: "{{states('input_number.rct_soc_min')|multiply(0.01)|round(2)}}"
+    mode: queued
+    
+
+shell_command:
+  writerctpower: '/config/python_scripts/rct.py set {{ object_name }} {{ object_value }} --host=172.19.98.47'
