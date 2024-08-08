@@ -22,6 +22,28 @@ input_number:
     icon: "mdi:battery-low"
 
 
+switch:
+  - platform: template
+    switches:
+      rct_lock_battery:
+        friendly_name: Lock battery
+        turn_on:
+          - action: shell_command.writerctpower
+            data:
+              object_name: "power_mng.soc_strategy"
+              object_value: "2"
+          - action: shell_command.writerctpower
+            data:
+              object_name: "power_mng.battery_power_extern"
+              object_value: "0"
+        turn_off:
+          - action: shell_command.writerctpower
+            data:
+              object_name: "power_mng.soc_strategy"
+              object_value: "4"
+
+
+
 automation:
   - alias: "set_rct_soc_max"
     trigger:
@@ -43,7 +65,7 @@ automation:
           object_name: "power_mng.soc_min"
           object_value: "{{states('input_number.rct_soc_min')|multiply(0.01)|round(2)}}"
     mode: queued
-    
+
 
 shell_command:
-  writerctpower: '/config/python_scripts/rct.py set {{ object_name }} {{ object_value }} --host=172.19.98.47'
+  writerctpower: '/config/rct.py set {{ object_name }} {{ object_value }} --host=172.19.98.47'
