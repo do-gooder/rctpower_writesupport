@@ -151,11 +151,13 @@ Hint: Do not forget to scale the input number from percentage (i.e. 97%) to frac
 
 ## Home Assistant Integration as package
 
+```
 Home Assistant Root Folder:
 └── config
     ├── packages
     │   └── rctpower.yaml
     └── rct.py
+```
 
 1. Copy rct.py to /config/rct.py
 2. Copy packages/rctpower.yaml to /config/packages/rctpower.yaml
