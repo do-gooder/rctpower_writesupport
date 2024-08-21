@@ -1,8 +1,11 @@
+## This package requires rctclient
+## You can install RCT Power Integration https://github.com/weltenwort/home-assistant-rct-power-integration
+
 input_number:
   rct_soc_max:
     name: Max SOC target
     # ToDo: Read inital value when HA starts
-    initial: 97
+    # initial: 97
     # ToDo: Find a good min-value (gt rct_soc_min)
     min: 30
     max: 97
@@ -13,7 +16,7 @@ input_number:
   rct_soc_min:
     name: Min SOC target
     # ToDo: Read inital value when HA starts
-    initial: 7
+    # initial: 7
     min: 7
     # ToDo: Find a good max-value (lt rct_soc_max)
     max: 50
@@ -27,6 +30,7 @@ switch:
     switches:
       rct_lock_battery:
         friendly_name: Lock battery
+        unique_id: rct_lock_battery
         turn_on:
           - action: shell_command.writerctpower
             data:
@@ -41,6 +45,25 @@ switch:
             data:
               object_name: "power_mng.soc_strategy"
               object_value: "4"
+      
+      rct_max_charge:
+        friendly_name: QuickCharge battery
+        unique_id: rct_quickcharge_battery
+        turn_on:
+          - action: shell_command.writerctpower
+            data:
+              object_name: "power_mng.soc_strategy"
+              object_value: "2"
+          - action: shell_command.writerctpower
+            data:
+              object_name: "power_mng.battery_power_extern"
+              object_value: "0" # Change power in watt. Negative for charging, positiv for discharging. e.g -6000 for 6 kW charging
+        turn_off:
+          - action: shell_command.writerctpower
+            data:
+              object_name: "power_mng.soc_strategy"
+              object_value: "4"
+
 
 
 

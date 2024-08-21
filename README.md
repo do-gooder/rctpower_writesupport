@@ -8,6 +8,13 @@ Write support for RCT Power Serial Protocol with rctclient
 
 Refer also to: [rctclient | write support](https://rctclient.readthedocs.io/en/latest/cli_write_support.html)
 
+## Table of contents
+1. [Scenarios](#scenarios)
+2. [Usage](#usage)
+3. [Homeassistant Integration with pyscript](#homeassistant-integration-with-pyscript)
+4. [Home Assistant Integration as package](#home-assistant-integration-as-package)
+5. [Links](#links)
+
 
 ## Scenarios
 
@@ -74,7 +81,7 @@ Valid Parameters:
     Default Value: 0.05
 ```
 
-## Homeassistant Integration
+## Homeassistant Integration with pyscript
 This is an elementary example, how the script could be used within Homeassistant.
 
 ### Preperations
@@ -141,6 +148,14 @@ action:
 mode: single
 ```
 Hint: Do not forget to scale the input number from percentage (i.e. 97%) to fractions (i.e. 0.97) by using the pipeline `|multiply(0.01)|round(2)`, as the script expects values from 0...1 as input.
+
+## Home Assistant Integration as package
+
+1. Copy rct.py to /config/rct.py
+2. Copy packages/rctpower.yaml to /config/packages/rctpower.yaml
+3. Edit /config/packages/rctpower.yaml and set the charging power for QuickCharge. Be careful!
+3. Install [Home Assistant RCT Power Integration](https://github.com/weltenwort/home-assistant-rct-power-integration)
+4. Restart HA
 
 ## Links
 [Rctclient's documentation](https://rctclient.readthedocs.io/en/latest/index.html)
