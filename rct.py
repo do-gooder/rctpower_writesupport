@@ -4,10 +4,12 @@
 ## power_mng.soc_target_set		    Force SOC target (default: 0.5) --> (1: Konstant)
 ## power_mng.battery_power_extern	Battery target power (positive = discharge) --> (2. Extern)
 
-## power_mng.soc_min			Min SOC target (default 0.07) --> ggf. als Ersatzstrom-Reserve
-## power_mng.soc_max			Max SOC target (default 0.97) --> ggf. zur Begrenzung des Max.-Ladezustandes
-## power_mng.soc_charge_power	Charging to power_mng.soc_min with given W (default: 100)
-## power_mng.soc_charge			Trigger for charing to soc_min (default: 0.05)
+## power_mng.soc_min			    Min SOC target (default 0.07) --> ggf. als Ersatzstrom-Reserve
+## power_mng.soc_max			    Max SOC target (default 0.97) --> ggf. zur Begrenzung des Max.-Ladezustandes
+## power_mng.soc_charge_power	    Charging to power_mng.soc_min with given W (default: 100)
+## power_mng.soc_charge			    Trigger for charing to soc_min (default: 0.05)
+
+## p_rec_lim[1]                     Max. battery to grid power (default 0) --> Max. Netzeinspeisung aus Batterie in W
 
 ## Imports
 import sys
@@ -24,7 +26,7 @@ from rctclient.utils import decode_value, encode_value
 # (activate for testing/debugging only and do not forget to deactivate!)
 # (if command line arguments are passed while testing mode activated, the testing mode will be ignored)
 testing_mode   = False
-testing_string = 'get power_mng.soc_max --host=192.168.0.99'
+testing_string = "set p_rec_lim[1] 7000 --host=192.168.0.99"
 
 if testing_mode == True:
     if len(sys.argv) < 2:
@@ -69,6 +71,9 @@ def show_help():
     print("    Default Value: 100")
     print("  power_mng.soc_charge - Trigger for charging to SOC_min")
     print("    Default Value: 0.05")
+    print("  p_rec_lim[1] - Max. battery to grid power")
+    print("    Valid Range: 0 to 6000")
+    print("    Default Value: 0")
 
 ## Write/Set Function
 def set_value(parameter, value, host):
@@ -79,7 +84,8 @@ def set_value(parameter, value, host):
         "power_mng.soc_min",
         "power_mng.soc_max",
         "power_mng.soc_charge_power",
-        "power_mng.soc_charge"
+        "power_mng.soc_charge",
+        "p_rec_lim[1]"
     ]
 
     if parameter not in valid_parameters:
@@ -141,6 +147,15 @@ def set_value(parameter, value, host):
             print(f"Error: Invalid value '{value}' for parameter '{parameter}'.")
             show_help()
             sys.exit(1)
+    elif parameter == "p_rec_lim[1]":
+        try:
+            value = float(value)
+            if not (0 <= value <= 6000):
+                raise ValueError
+        except ValueError:
+            print(f"Error: Invalid value '{value}' for parameter '{parameter}'.")
+            show_help()
+            sys.exit(1)
 
     object_name = parameter
     command = Command.WRITE
@@ -167,7 +182,8 @@ def get_value(parameter, host):
         "power_mng.soc_max",
         "power_mng.soc_min",
         "power_mng.soc_charge_power",
-        "power_mng.soc_charge"
+        "power_mng.soc_charge",
+        "p_rec_lim[1]"
     ]
 
     if parameter not in valid_parameters:
