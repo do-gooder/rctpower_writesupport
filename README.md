@@ -79,6 +79,9 @@ Valid Parameters:
     Default Value: 100
   power_mng.soc_charge - Trigger for charging to SOC_min
     Default Value: 0.05
+  p_rec_lim[1] - Max. battery to grid power
+    Valid Range: 0 to 6000
+    Default Value: 0
 ```
 
 ## Homeassistant Integration with pyscript
