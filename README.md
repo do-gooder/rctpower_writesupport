@@ -84,7 +84,7 @@ Valid Parameters:
     Default Value: 0
 ```
 
-## Homeassistant Integration with pyscript
+## Homeassistant Integration with pyscript (Alternative 1)
 This is an elementary example, how the script could be used within Homeassistant.
 
 ### Preperations
@@ -152,7 +152,7 @@ mode: single
 ```
 Hint: Do not forget to scale the input number from percentage (i.e. 97%) to fractions (i.e. 0.97) by using the pipeline `|multiply(0.01)|round(2)`, as the script expects values from 0...1 as input.
 
-## Home Assistant Integration as package
+## Home Assistant Integration as package (Alternative 2)
 
 ```
 Home Assistant Root Folder:
