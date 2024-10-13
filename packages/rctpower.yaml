@@ -87,6 +87,10 @@ automation:
         data:
           object_name: "power_mng.soc_min"
           object_value: "{{states('input_number.rct_soc_min')|multiply(0.01)|round(2)}}"
+      - action: shell_command.writerctpower
+        data:
+          object_name: "power_mng.soc_charge"
+          object_value: "{{states('input_number.rct_soc_min')|multiply(0.01)-0.02|round(2)}}"
     mode: queued
 
 
