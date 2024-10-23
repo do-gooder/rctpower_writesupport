@@ -163,11 +163,16 @@ Home Assistant Root Folder:
 ```
 
 1. Copy rct.py to /config/rct.py
-2. Copy packages/rctpower.yaml to /config/packages/rctpower.yaml
-3. Edit /config/packages/rctpower.yaml and set the charging power for QuickCharge. Be careful!
-4. Edit /config/packages/rctpower.yaml and change the IP to your inverter IP
-5. Install [Home Assistant RCT Power Integration](https://github.com/weltenwort/home-assistant-rct-power-integration)
-6. Restart HA
+2. Check configuration.yaml for
+```
+homeassistant:
+  packages: !include_dir_named packages
+```
+3. Copy packages/rctpower.yaml to /config/packages/rctpower.yaml
+4. Edit /config/packages/rctpower.yaml and set the charging power for QuickCharge. Be careful!
+5. Edit /config/packages/rctpower.yaml and change the IP to your inverter IP
+6. Install [Home Assistant RCT Power Integration](https://github.com/weltenwort/home-assistant-rct-power-integration)
+7. Restart HA
 
 ![image](<images/packages_result.png>)
 
