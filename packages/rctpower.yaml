@@ -95,4 +95,4 @@ automation:
 
 
 shell_command:
-  writerctpower: '/config/rct.py set {{ object_name }} {{ object_value }} --host=172.19.98.47'
+  writerctpower: 'python /config/rct.py set {{ object_name }} {{ object_value }} --host=172.19.98.47'
