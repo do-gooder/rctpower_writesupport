@@ -64,6 +64,7 @@ def show_help():
     print("  power_mng.battery_power_extern - Battery target power")
     print("    Valid Range: {} to {}".format(MIN_BATTERY_POWER_EXTERN, MAX_BATTERY_POWER_EXTERN))
     print("      Positive values indicate discharge, negative values indicate charge")
+    print("      Note: Values will be automatically adjusted to fit within valid ranges.")
     print("    Default Value: 0")
     print("  power_mng.soc_min - Min SOC target")
     print("    Valid Range: 0.00 to 1.00, with at most two decimal places")
