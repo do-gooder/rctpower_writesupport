@@ -11,6 +11,10 @@
 
 ## p_rec_lim[1]                     Max. battery to grid power (default 0) --> Max. Netzeinspeisung aus Batterie in W
 
+## Threshold values
+MIN_BATTERY_POWER_EXTERN = -6000
+MAX_BATTERY_POWER_EXTERN = 6000
+
 ## Imports
 import sys
 import os
@@ -58,7 +62,7 @@ def show_help():
     print("    Valid Range: 0.00 to 1.00, with at most two decimal places")
     print("    Default Value: 0.50")
     print("  power_mng.battery_power_extern - Battery target power")
-    print("    Valid Range: -6000 to 6000")
+    print("    Valid Range: {} to {}".format(MIN_BATTERY_POWER_EXTERN, MAX_BATTERY_POWER_EXTERN))
     print("      Positive values indicate discharge, negative values indicate charge")
     print("    Default Value: 0")
     print("  power_mng.soc_min - Min SOC target")
@@ -116,8 +120,10 @@ def set_value(parameter, value, host):
     elif parameter == "power_mng.battery_power_extern":
         try:
             value = float(value)
-            if not (-6000 <= value <= 6000):
-                raise ValueError
+            if value > MAX_BATTERY_POWER_EXTERN:
+                value = MAX_BATTERY_POWER_EXTERN
+            elif value < MIN_BATTERY_POWER_EXTERN:
+                value = MIN_BATTERY_POWER_EXTERN
         except ValueError:
             print(f"Error: Invalid value '{value}' for parameter '{parameter}'.")
             show_help()
