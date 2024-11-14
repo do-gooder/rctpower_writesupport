@@ -83,6 +83,9 @@ Valid Parameters:
   p_rec_lim[1] - Max. battery to grid power
     Valid Range: 0 to 6000
     Default Value: 0
+  power_mng.use_grid_power_enable - Enable or disable grid power usage
+    Valid Values: False or True
+    Default Value: False
 ```
 
 ## Homeassistant Integration with pyscript (Alternative 1)
