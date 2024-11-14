@@ -73,7 +73,20 @@ switch:
               object_name: "power_mng.soc_strategy"
               object_value: "4"
 
-
+      rct_use_grid_power:
+        friendly_name: Use Grid Power
+        unique_id: rct_use_grid_power
+        # icon: battery-charging
+        turn_on:
+          - action: shell_command.writerctpower
+            data:
+              object_name: "power_mng.use_grid_power_enable"
+              object_value: "True"
+        turn_off:
+          - action: shell_command.writerctpower
+            data:
+              object_name: "power_mng.use_grid_power_enable"
+              object_value: "False"
 
 
 automation:
