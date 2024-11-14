@@ -79,6 +79,9 @@ def show_help():
     print("  p_rec_lim[1] - Max. battery to grid power")
     print("    Valid Range: 0 to 6000")
     print("    Default Value: 0")
+    print("  power_mng.use_grid_power_enable - Enable or disable grid power usage")
+    print("    Valid Values: FALSE or TRUE")
+    print("    Default Value: FALSE")
 
 ## Write/Set Function
 def set_value(parameter, value, host):
@@ -91,6 +94,7 @@ def set_value(parameter, value, host):
         "power_mng.soc_charge_power",
         "power_mng.soc_charge",
         "p_rec_lim[1]"
+        "power_mng.use_grid_power_enable"
     ]
 
     if parameter not in valid_parameters:
@@ -163,6 +167,16 @@ def set_value(parameter, value, host):
             print(f"Error: Invalid value '{value}' for parameter '{parameter}'.")
             show_help()
             sys.exit(1)
+    elif parameter == "power_mng.use_grid_power_enable":
+        value = value.lower()
+        if value not in ["false", "true"]:
+            print(f"Error: Invalid value '{value}' for parameter '{parameter}'.")
+            show_help()
+            sys.exit(1)
+        if value == "true":
+          value = True
+        else:
+          value = False
 
     object_name = parameter
     command = Command.WRITE
@@ -191,6 +205,7 @@ def get_value(parameter, host):
         "power_mng.soc_charge_power",
         "power_mng.soc_charge",
         "p_rec_lim[1]"
+        "power_mng.use_grid_power_enable"
     ]
 
     if parameter not in valid_parameters:
