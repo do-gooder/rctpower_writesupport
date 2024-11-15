@@ -93,7 +93,7 @@ def set_value(parameter, value, host):
         "power_mng.soc_max",
         "power_mng.soc_charge_power",
         "power_mng.soc_charge",
-        "p_rec_lim[1]"
+        "p_rec_lim[1]",
         "power_mng.use_grid_power_enable"
     ]
 
@@ -204,7 +204,7 @@ def get_value(parameter, host):
         "power_mng.soc_min",
         "power_mng.soc_charge_power",
         "power_mng.soc_charge",
-        "p_rec_lim[1]"
+        "p_rec_lim[1]",
         "power_mng.use_grid_power_enable"
     ]
 
