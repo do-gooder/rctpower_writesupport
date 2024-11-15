@@ -66,7 +66,7 @@ switch:
           - action: shell_command.writerctpower
             data:
               object_name: "power_mng.battery_power_extern"
-              object_value: "{{states('input_number.rct_quickcharge_power' | int * -1)}}"
+              object_value: "{{states('input_number.rct_quickcharge_power') | int * -1}}"
         turn_off:
           - action: shell_command.writerctpower
             data:
