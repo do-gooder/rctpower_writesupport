@@ -1,0 +1,104 @@
+automation:
+  - alias: AutoCharge
+    description: ""
+    triggers:
+      - entity_id:
+            ### Tibbber's aktueller Strompreis
+          - sensor.zuhause_strompreis
+            ### RCT Power SoC
+          - sensor.rct_power_battery_state_of_charge
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 15
+        trigger: state
+    conditions: []
+    actions:
+      - choose:
+          - conditions:
+              - condition: and
+                conditions:
+                  - condition: numeric_state
+                    ### Tibber's aktueller Stormpreis
+                    entity_id: sensor.zuhause_strompreis
+                    below: input_number.grenzpreis_strom
+                  - condition: numeric_state
+                    ### RCT Power SoC
+                    entity_id: sensor.rct_power_battery_state_of_charge
+                    below: input_number.grenzwert_akku
+                  - condition: state
+                    entity_id: switch.rct_max_charge
+                    state: "off"
+            sequence:
+              - action: switch.turn_on
+                metadata: {}
+                data: {}
+                target:
+                  entity_id: switch.rct_max_charge
+              - if:
+                  - condition: numeric_state
+                    ### RCT Power SoC
+                    entity_id: sensor.rct_power_battery_state_of_charge
+                    below: input_number.rct_soc_min
+                then:
+                  - action: shell_command.writerctpower
+                    data:
+                      object_name: power_mng.soc_min
+                      object_value: >-
+                        {{states('input_number.rct_soc_min')|multiply(0.01)-0.02|round(2)}}
+                  - action: switch.turn_on
+                    metadata: {}
+                    data: {}
+                    target:
+                      entity_id: input_boolean.rct_min_abgesenkt
+                else:
+                  - action: switch.turn_off
+                    metadata: {}
+                    data: {}
+                    target:
+                      entity_id: input_boolean.rct_min_abgesenkt
+          - conditions:
+              - condition: and
+                conditions:
+                  - condition: state
+                    entity_id: switch.rct_max_charge
+                    state: "on"
+                  - condition: or
+                    conditions:
+                      - condition: numeric_state
+                        ### Tibber's Strompreis
+                        entity_id: sensor.zuhause_strompreis
+                        above: input_number.grenzpreis_strom
+                      - condition: numeric_state
+                        ### RCT Power SoC
+                        entity_id: sensor.rct_power_battery_state_of_charge
+                        above: input_number.grenzwert_akku
+            sequence:
+              - action: switch.turn_off
+                target:
+                  entity_id:
+                    - switch.rct_max_charge
+                data: {}
+              - if:
+                  - condition: state
+                    entity_id: input_boolean.rct_min_abgesenkt
+                    state: "on"
+                then:
+                  - action: shell_command.writerctpower
+                    data:
+                      object_name: power_mng.soc_min
+                      object_value: >-
+                        {{states('input_number.rct_soc_min')|multiply(0.01)|round(2)}}
+                  - action: switch.turn_off
+                    metadata: {}
+                    data: {}
+                    target:
+                      entity_id: input_boolean.rct_min_abgesenkt
+    mode: single
+
+
+input_boolean
+  - name: rct_min_abgesenkt
+    initial: off
+
+    
