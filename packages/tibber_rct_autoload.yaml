@@ -97,8 +97,23 @@ automation:
     mode: single
 
 
-input_boolean
+input_boolean:
   - name: rct_min_abgesenkt
     initial: off
 
-    
+input_number:
+  grenzpreis_strom:
+    name: Grenzpreis Strom
+    #initial: 0.284
+    min: 0
+    max: 0.5
+    step: 0.001
+    mode: box
+
+  grenzwert_akku:
+    name: Grenzwert Akku
+    # initial: 0.85
+    min: 70
+    max: 95
+    step: 0.1
+    mode: slider
