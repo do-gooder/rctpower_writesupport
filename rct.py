@@ -20,6 +20,8 @@ import sys
 import os
 import socket
 import select
+import time  # Required for the retry mechanism
+
 from rctclient.frame import make_frame, ReceiveFrame
 from rctclient.registry import REGISTRY
 from rctclient.types import Command
@@ -82,6 +84,35 @@ def show_help():
     print("  power_mng.use_grid_power_enable - Enable or disable grid power usage")
     print("    Valid Values: FALSE or TRUE")
     print("    Default Value: FALSE")
+
+
+def send_data(host_port, data):
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.settimeout(5)  # Set a timeout for the connection (in seconds)
+            print(f"*** Connecting to {host_port}...")
+            sock.connect(host_port)
+            print("*** Connection successful.")
+            
+            # Attempt to send data
+            if isinstance(data, str):
+                data = data.encode()  # Encode string data to bytes
+            
+            sock.sendall(data)
+            print("*** Data sent successfully.")
+    
+    except socket.timeout:
+        print("### ERROR ### Connection timed out. Please check the server address or try again later.")
+    
+    except socket.error as e:
+        print(f"### ERROR ### Socket error occurred: {e}")
+    
+    except Exception as e:
+        print(f"### ERROR ### An unexpected error occurred: {e}")
+    
+    finally:
+        print("*** Socket closed.")
+
 
 ## Write/Set Function
 def set_value(parameter, value, host):
@@ -186,13 +217,64 @@ def set_value(parameter, value, host):
     encoded_value = encode_value(data_type=object_info.request_data_type, value=value)
     send_frame = make_frame(command=command, id=object_info.object_id, payload=encoded_value)
 
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect(host_port)
-    sock.send(send_frame)
-    sock.close()
+    send_data(host_port, send_frame)
 
     output = "Setting value " + str(value) + " for parameter " + parameter + " on host " + host
     return output
+
+
+def communicate_with_server(host_port, send_frame, response_data_type, retries=3, timeout=5):
+    for attempt in range(retries):
+        print(f"Attempting connection to {host_port} (Attempt {attempt + 1}/{retries})...")
+        
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            try:
+                sock.settimeout(timeout)
+                sock.connect(host_port)
+                sock.sendall(send_frame)
+                print("*** Data sent successfully. Waiting for response...")
+
+                # Prepare for receiving data
+                response_frame = ReceiveFrame()
+                buffer_size = 256
+                select_timeout = timeout  # Set a longer timeout here
+
+                while not response_frame.complete():
+                    ready_read, _, _ = select.select([sock], [], [], select_timeout)
+                    
+                    if ready_read:
+                        buf = sock.recv(buffer_size)
+                        if buf:
+                            print(f"Received buffer data: {buf}")
+                            response_frame.consume(buf)
+                        else:
+                            print("ERROR: Socket closed by the remote host.")
+                            break  # Break out to retry the connection
+                    else:
+                        print("ERROR: Timed out waiting for data. Retrying if possible.")
+                        break  # Exit to retry the connection
+
+                else:  # Executes only if the while loop completes without breaking
+                    decoded_value = decode_value(response_data_type, response_frame.data)
+                    print(f"Successfully received data: {decoded_value}")
+                    return decoded_value
+
+            except socket.timeout:
+                print("ERROR: Connection attempt timed out. Retrying...")
+            except socket.gaierror:
+                print("ERROR: Hostname could not be resolved.")
+                return None  # Fatal error; retrying won't resolve it
+            except socket.error as e:
+                print(f"ERROR: Socket error occurred: {e}")
+            except Exception as e:
+                print(f"ERROR: Unexpected error: {e}")
+                
+            # Wait briefly before retrying
+            time.sleep(1)
+
+    print("ERROR: All connection attempts failed.")
+    return None
+
 
 ## Read/Get Function
 def get_value(parameter, host):
@@ -220,34 +302,13 @@ def get_value(parameter, host):
     object_info = REGISTRY.get_by_name(object_name)
     send_frame = make_frame(command=command, id=object_info.object_id)
 
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect(host_port)
-    sock.send(send_frame)
+    output = communicate_with_server(host_port, send_frame, object_info.response_data_type)
 
-    # Receive the response
-    response_frame = ReceiveFrame()
-    while True:
-        ready_read, _, _ = select.select([sock], [], [], 2.0)
-        if sock in ready_read:
-            # receive content of the input buffer
-            buf = sock.recv(256)
-            # if there is content, let the frame consume it
-            if len(buf) > 0:
-                response_frame.consume(buf)
-                # if the frame is complete, we're done
-                if response_frame.complete():
-                    break
-            else:
-                # the socket was closed by the device, exit
-                sys.exit(1)
-
-    # Decode the response value
-    decoded_value = decode_value(object_info.response_data_type, response_frame.data)
-
-    sock.close()
-
-    output = decoded_value
-    return output
+    if output != None:
+        return "*** READ SUCCESS of " + parameter + ": " + str(output)
+    else:
+        return "### ERROR ### could not read parameter: " + parameter
+    
 
 ## Main Function
 if __name__ == "__main__":
