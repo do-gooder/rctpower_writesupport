@@ -69,7 +69,7 @@ def show_help():
     print("      Note: Values will be automatically adjusted to fit within valid ranges.")
     print("    Default Value: 0")
     print("  power_mng.soc_min - Min SOC target")
-    print("    Valid Range: 0.00 to 1.00, with at most two decimal places")
+    print("    Valid Range: 0.05 to 1.00, with at most two decimal places")
     print("    Default Value: 0.07")
     print("  power_mng.soc_max - Max SOC target")
     print("    Valid Range: 0.00 to 1.00, with at most two decimal places")
@@ -167,7 +167,7 @@ def set_value(parameter, value, host):
     elif parameter == "power_mng.soc_min":
         try:
             value = float(value)
-            if not (0.00 <= value <= 1.00) or len(str(value).split(".")[1]) > 2:
+            if not (0.05 <= value <= 1.00) or len(str(value).split(".")[1]) > 2:
                 raise ValueError
         except ValueError:
             print(f"Error: Invalid value '{value}' for parameter '{parameter}'.")
