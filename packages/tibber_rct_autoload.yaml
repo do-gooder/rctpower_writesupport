@@ -49,7 +49,7 @@ automation:
                     data:
                       object_name: power_mng.soc_min
                       object_value: >-
-                        {{states('input_number.rct_soc_min')|multiply(0.01)-0.02|round(2)}}
+                        {{states('input_number.rct_soc_min')|multiply(0.01)-0.03|round(2)}}
                   - action: switch.turn_on
                     metadata: {}
                     data: {}
