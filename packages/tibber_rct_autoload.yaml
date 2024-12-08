@@ -7,6 +7,7 @@ automation:
           - sensor.zuhause_strompreis
             ### RCT Power SoC
           - sensor.rct_power_battery_state_of_charge
+          - input_number.grenzpreis_strom
         for:
           hours: 0
           minutes: 0
