@@ -12,7 +12,11 @@ automation:
           minutes: 0
           seconds: 15
         trigger: state
-    conditions: []
+    conditions:
+      - condition: template
+        value_template: >-
+          {{ states('sensor.rct_power_battery_state_of_charge') | int <=
+          states('input_number.grenzwert_akku') | int - 5 }}
     actions:
       - choose:
           - conditions:
