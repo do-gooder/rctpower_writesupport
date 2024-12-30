@@ -21,7 +21,7 @@ Refer also to: [rctclient | write support](https://rctclient.readthedocs.io/en/l
 ### Charging from the grid for e.g. Tibber
 
 1. Set ``power_mng.soc_strategy`` to 2
-2. Set ``power_mng.battery_power_external`` to the desired charging power (e.g. -6000 = 6 kW)
+2. Set ``power_mng.battery_power_extern`` to the desired charging power (e.g. -6000 = 6 kW)
 3. Wait until SOC target is reached
 4. Set ``power_mng.soc_strategy`` to 4
 5. Set ``power_mng.battery_power_extern`` to 0
@@ -31,7 +31,7 @@ Refer also to: [rctclient | write support](https://rctclient.readthedocs.io/en/l
 This also prevents excess charging. The battery is therefore not used at all.
 
 1. Set ``power_mng.soc_strategy`` to 2
-2. Set ``power_mng.battery_power_external`` to 0
+2. Set ``power_mng.battery_power_extern`` to 0
 3. Wait as long as the car is charging
 4. Set ``power_mng.soc_strategy`` to 4
 
