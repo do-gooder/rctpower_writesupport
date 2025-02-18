@@ -11,7 +11,7 @@
 
 ## p_rec_lim[1]                     Max. battery to grid power (default 0) --> Max. Netzeinspeisung aus Batterie in W
 
-## buf_v_control.power_reduction    External power reduction based on solar plant peak power -> Externe Einspeisebegrenzung aus der PV Peak Power in Prozent (0.00 - 1.00)
+## buf_v_control.power_reduction    External power reduction based on solar plant peak power --> Externe Leistungsreduzierung basierend auf der Spitzenleistung der Solaranlage (0.00 - 1.00)
 
 ## Threshold values
 MIN_BATTERY_POWER_EXTERN = -6000
