@@ -113,24 +113,27 @@ Home Assistant Root Folder:
         └── rct_ha_call.py
 ```
 
-within the file `rct_ha_call.py` update the default arguments according to your needs:
+within the file `rct_ha_call.py` update the default arguments of the header according to your needs:
 ```python
 @service
 def rct_ha_call(action='set', parameter='power_mng.soc_max', value=0.97, host='192.168.0.99'):
-    #"""Using rct.py to set/get parameter of the RCT inverter"""
 
-    from rct import get_value, set_value
+...
 
-    output = set_value(parameter=parameter, value=value, host=host)
-    print(output)
-    log.info(f"rct_ha_call: {output}")
 ```
 If a default value is provided, less arguments are needed when the service is called from Home Assistant as a service later.
 In this case, I just want to use to **set** the parameter of **power_mng.soc_max** of fixed inverter with IP **192.168.0.99**.
 
 ### Testing
-Now, the service "rct_ha_call" should be available and the `value: 0.97` is the data supplied to the service as the maximum state of charge:
-![image](<images/Bildschirmfoto 2024-08-07 um 09.35.41.png>)
+Now, the service "rct_ha_call" should be available and 
+shall be ready for a first test like this:
+![image](<images/Bildschirmfoto 2025-03-03 um 10.05.39.png>)
+
+If successfull, this will report something like this in Home Assistant Core System Protocol:
+![image](<images/Bildschirmfoto 2025-03-03 um 10.05.05.png>)
+
+Afterwards, setting data works like this:
+![image](<images/Bildschirmfoto 2025-03-03 um 10.11.01.png>)
 
 ### Usage
 Just my implementation for usage as an example:
