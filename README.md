@@ -47,6 +47,19 @@ Set to default:
 1. Set ``power_mng.soc_min`` to 0.07 (for 7%)
 2. Set ``power_mng.soc_charge`` to 0.05 (for 5%)
 
+### Limit grid feed-in
+
+To limit the grid feed-in use the value ``buf_v_control.power_reduction``. Set it to 1.0 (100%) to feed in all generated solar power which isn't used by yourself
+
+All generated solar power which isn't used by yourself should go into the grid:
+1. Set ``buf_v_control.power_reduction`` to 1.00 (for 100%)
+
+When you are only allowed to feed in 60% use:
+1. Set ``buf_v_control.power_reduction`` to 0.60 (for 60%)
+
+For zero feed in, set it to 0%:
+1. Set ``buf_v_control.power_reduction`` to 0.00 (for 0%)
+
 ## Usage
 ```
 rct.py get <parameter> --host=<ip_address_or_hostname>
@@ -86,6 +99,9 @@ Valid Parameters:
   power_mng.use_grid_power_enable - Enable or disable grid power usage
     Valid Values: False or True
     Default Value: False
+  buf_v_control.power_reduction - External power reduction based on solar plant peak power
+    Valid Range: 0.00 to 1.00, with at most two decimal places
+    Default Value: 1.00
 ```
 
 ## Homeassistant Integration with pyscript (Alternative 1)
