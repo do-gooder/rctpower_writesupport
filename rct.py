@@ -11,6 +11,8 @@
 
 ## p_rec_lim[1]                     Max. battery to grid power (default 0) --> Max. Netzeinspeisung aus Batterie in W
 
+## buf_v_control.power_reduction    External power reduction based on solar plant peak power --> Externe Leistungsreduzierung basierend auf der Spitzenleistung der Solaranlage (0.00 - 1.00)
+
 ## Threshold values
 MIN_BATTERY_POWER_EXTERN = -6000
 MAX_BATTERY_POWER_EXTERN = 6000
@@ -84,6 +86,9 @@ def show_help():
     print("  power_mng.use_grid_power_enable - Enable or disable grid power usage")
     print("    Valid Values: FALSE or TRUE")
     print("    Default Value: FALSE")
+    print("  buf_v_control.power_reduction - External power reduction based on solar plant peak power")
+    print("    Valid Range: 0.00 to 1.00, with at most two decimal places")
+    print("    Default Value: 1.00")
 
 
 def send_data(host_port, data):
@@ -125,7 +130,8 @@ def set_value(parameter, value, host):
         "power_mng.soc_charge_power",
         "power_mng.soc_charge",
         "p_rec_lim[1]",
-        "power_mng.use_grid_power_enable"
+        "power_mng.use_grid_power_enable",
+        "buf_v_control.power_reduction"
     ]
 
     if parameter not in valid_parameters:
@@ -208,6 +214,15 @@ def set_value(parameter, value, host):
           value = True
         else:
           value = False
+    elif parameter == "buf_v_control.power_reduction":
+        try:
+            value = float(value)
+            if not (0.00 <= value <= 1.00) or len(str(value).split(".")[1]) > 2:
+                raise ValueError
+        except ValueError:
+            print(f"Error: Invalid value '{value}' for parameter '{parameter}'.")
+            show_help()
+            sys.exit(1)
 
     object_name = parameter
     command = Command.WRITE
@@ -287,7 +302,8 @@ def get_value(parameter, host):
         "power_mng.soc_charge_power",
         "power_mng.soc_charge",
         "p_rec_lim[1]",
-        "power_mng.use_grid_power_enable"
+        "power_mng.use_grid_power_enable",
+        "buf_v_control.power_reduction"
     ]
 
     if parameter not in valid_parameters:
