@@ -15,7 +15,6 @@ Refer also to: [rctclient | write support](https://rctclient.readthedocs.io/en/l
 4. [Home Assistant Integration as package](#home-assistant-integration-as-package)
 5. [Links](#links)
 
-
 ## Scenarios
 
 ### Charging from the grid for e.g. Tibber
@@ -25,7 +24,6 @@ Refer also to: [rctclient | write support](https://rctclient.readthedocs.io/en/l
 3. Wait until SOC target is reached
 4. Set ``power_mng.soc_strategy`` to 4
 5. Set ``power_mng.battery_power_extern`` to 0
-
 
 ### Discharge lock during e-car charging
 This also prevents excess charging. The battery is therefore not used at all.
@@ -49,16 +47,10 @@ Set to default:
 
 ### Limit grid feed-in
 
-To limit the grid feed-in use the value ``buf_v_control.power_reduction``. Set it to 1.0 (100%) to feed in all generated solar power which isn't used by yourself
+To limit the grid feed-in use the value ``buf_v_control.power_reduction``. <br>
+Set it to 1.0 (100%) to feed in all generated solar power which isn't used by yourself or to 0.0 (0%) to disable export to grid. 
 
-All generated solar power which isn't used by yourself should go into the grid:
-1. Set ``buf_v_control.power_reduction`` to 1.00 (for 100%)
-
-When you are only allowed to feed in 60% use:
-1. Set ``buf_v_control.power_reduction`` to 0.60 (for 60%)
-
-For zero feed in, set it to 0%:
-1. Set ``buf_v_control.power_reduction`` to 0.00 (for 0%)
+The reduction is based on solar plant peak power.
 
 ## Usage
 ```
