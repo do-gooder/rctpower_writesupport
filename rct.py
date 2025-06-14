@@ -13,6 +13,9 @@
 
 ## buf_v_control.power_reduction    External power reduction based on solar plant peak power --> Externe Leistungsreduzierung basierend auf der Spitzenleistung der Solaranlage (0.00 - 1.00)
 
+## Experimental Features:
+## power_mng.is_island_only         Switch for island mode --> (TRUE: Schaltet den Inselbetrieb ein, FALSE: Schaltet den Inselbetrieb aus)
+
 ## Threshold values
 MIN_BATTERY_POWER_EXTERN = -6000
 MAX_BATTERY_POWER_EXTERN = 6000
@@ -34,7 +37,11 @@ from rctclient.utils import decode_value, encode_value
 # (activate for testing/debugging only and do not forget to deactivate!)
 # (if command line arguments are passed while testing mode activated, the testing mode will be ignored)
 testing_mode   = False
+
+# Testing strings for testing mode
 testing_string = "set p_rec_lim[1] 7000 --host=192.168.0.99"
+# testing_string = "get power_mng.soc_strategy --host=192.168.0.99"
+# testing_string = "set power_mng.is_island_only false --host=192.168.0.99"
 
 if testing_mode == True:
     if len(sys.argv) < 2:
@@ -89,6 +96,9 @@ def show_help():
     print("  buf_v_control.power_reduction - External power reduction based on solar plant peak power")
     print("    Valid Range: 0.00 to 1.00, with at most two decimal places")
     print("    Default Value: 1.00")
+    print("  power_mng.is_island_only - Switch for island mode")
+    print("    Valid Values: FALSE or TRUE")
+    print("    Default Value: FALSE")
 
 
 def send_data(host_port, data):
@@ -131,7 +141,8 @@ def set_value(parameter, value, host):
         "power_mng.soc_charge",
         "p_rec_lim[1]",
         "power_mng.use_grid_power_enable",
-        "buf_v_control.power_reduction"
+        "buf_v_control.power_reduction",
+        "power_mng.is_island_only"
     ]
 
     if parameter not in valid_parameters:
@@ -204,7 +215,7 @@ def set_value(parameter, value, host):
             print(f"Error: Invalid value '{value}' for parameter '{parameter}'.")
             show_help()
             sys.exit(1)
-    elif parameter == "power_mng.use_grid_power_enable":
+    elif parameter == "power_mng.use_grid_power_enable" or parameter == "power_mng.is_island_only":
         value = value.lower()
         if value not in ["false", "true"]:
             print(f"Error: Invalid value '{value}' for parameter '{parameter}'.")
@@ -303,7 +314,8 @@ def get_value(parameter, host):
         "power_mng.soc_charge",
         "p_rec_lim[1]",
         "power_mng.use_grid_power_enable",
-        "buf_v_control.power_reduction"
+        "buf_v_control.power_reduction",
+        "power_mng.is_island_only"
     ]
 
     if parameter not in valid_parameters:
