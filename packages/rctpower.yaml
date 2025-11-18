@@ -35,6 +35,7 @@ input_number:
 
 input_select:
   rct_soc_strategy_selector:
+    name: "RCT SOC strategy"
     options:
       - "4: Internal"
       - "0: SOC target"
