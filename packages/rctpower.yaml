@@ -33,6 +33,16 @@ input_number:
     unit_of_measurement: W
     icon: mdi:run-fast
 
+input_select:
+  rct_soc_strategy_selector:
+    options:
+      - "4: Internal"
+      - "0: SOC target"
+      - "1: Constant"
+      - "2: External"
+      - "3: Average Battery Voltage"
+      - "5: Schedule"
+    icon: "mdi:strategy"
 
 switch:
   - platform: template
@@ -53,7 +63,8 @@ switch:
           - action: shell_command.writerctpower
             data:
               object_name: "power_mng.soc_strategy"
-              object_value: "4"
+              object_value: >
+                {{ states('input_select.rct_soc_strategy_selector').split(':')[0] }}
       
       rct_max_charge:
         friendly_name: QuickCharge battery
@@ -71,7 +82,8 @@ switch:
           - action: shell_command.writerctpower
             data:
               object_name: "power_mng.soc_strategy"
-              object_value: "4"
+              object_value: >
+                {{ states('input_select.rct_soc_strategy_selector').split(':')[0] }}
 
       rct_use_grid_power:
         friendly_name: Use Grid Power
@@ -114,6 +126,16 @@ automation:
           object_name: "power_mng.soc_charge"
           object_value: "{{states('input_number.rct_soc_min')|multiply(0.01)-0.02|round(2)}}"
     mode: queued
+  - alias: "RCT Strategy Changer"
+    triggers:
+      - trigger: state
+        entity_id: input_select.rct_soc_strategy_selector
+    actions:
+      - action: shell_command.writerctpower
+        data:
+          object_name: "power_mng.soc_strategy"
+          object_value: >
+            {{ states('input_select.rct_soc_strategy_selector').split(':')[0] }}
 
 
 shell_command:
