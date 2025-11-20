@@ -52,6 +52,9 @@ switch:
         friendly_name: Lock battery
         unique_id: rct_lock_battery
         turn_on:
+          - action: switch.turn_off
+            target:
+              entity_id: switch.rct_max_charge 
           - action: shell_command.writerctpower
             data:
               object_name: "power_mng.soc_strategy"
@@ -71,6 +74,9 @@ switch:
         friendly_name: QuickCharge battery
         unique_id: rct_quickcharge_battery
         turn_on:
+          - action: switch.turn_off
+            target:
+              entity_id: switch.rct_lock_battery 
           - action: shell_command.writerctpower
             data:
               object_name: "power_mng.soc_strategy"
