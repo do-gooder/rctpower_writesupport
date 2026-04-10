@@ -66,7 +66,7 @@ Valid Parameters:
   power_mng.soc_charge            Trigger for charging to soc_min
   p_rec_lim[1]                    Max. battery to grid power (0-6000)
   power_mng.use_grid_power_enable Enable/disable grid power usage (TRUE/FALSE)
-  buf_v_control.power_reduction   External power reduction (0.00-1.00)
+  buf_v_control.power_reduction   External power reduction (0.000-1.000)
 """)
 
 
@@ -215,7 +215,7 @@ def set_value(parameter: str, value: str, host: str) -> str:
         value = True if v == "true" else False
 
     elif parameter == "buf_v_control.power_reduction":
-        value = validate_float(parameter, value, 0.0, 1.0)
+        value = validate_float(parameter, value, 0.0, 1.0, decimals=3)
 
     # Prepare and send frame
     host_port = (host, DEFAULT_PORT)
