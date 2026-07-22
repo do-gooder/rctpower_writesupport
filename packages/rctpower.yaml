@@ -4,7 +4,7 @@
 input_text:
   rct_ip_address:
     name: "RCT IP Address"
-    initial: "192.168.1.1"
+    initial: "192.168.1.193"
 
 input_number:
   rct_soc_max:
@@ -50,12 +50,23 @@ input_select:
       - "5: Schedule"
     icon: "mdi:strategy"
 
+command_line:
+  - sensor:
+      name: "Actual RCT SOC Strategy"
+      unique_id: actual_rct_soc_strategy
+      command: 'python /config/rct.py get_short power_mng.soc_strategy --host={{ states("input_text.rct_ip_address") }}'
+      scan_interval: 30
+  - sensor:
+      name: "Write RCT SOC Strategy"
+      unique_id: actual_rct_soc_strategy
+      command: 'python /config/rct.py set power_mng.soc_strategy 2 --host={{ states("input_text.rct_ip_address") }}'
+      scan_interval: 30
 
 
 template:
-  - switch:
+  - switch: # On = Lock battery, Off = Unlock battery 
       - name: "Lock battery"
-        unique_id: rct_lock_battery
+        unique_id: lock_battery
         turn_on:
           - action: switch.turn_off
             target:
@@ -74,13 +85,13 @@ template:
               object_name: "power_mng.soc_strategy"
               object_value: >
                 {{ states('input_select.rct_soc_strategy_selector').split(':')[0] }}
-      
+
       - name: "QuickCharge battery"
         unique_id: rct_quickcharge_battery
         turn_on:
           - action: switch.turn_off
             target:
-              entity_id: switch.rct_lock_battery 
+              entity_id: switch.lock_battery 
           - action: shell_command.writerctpower
             data:
               object_name: "power_mng.soc_strategy"
@@ -146,6 +157,7 @@ automation:
           object_value: >
             {{ states('input_select.rct_soc_strategy_selector').split(':')[0] }}
 
-
 shell_command:
   writerctpower: 'python /config/rct.py set {{ object_name }} {{ object_value }} --host={{ states("input_text.rct_ip_address") }}'
+  readrctpower: 'python /config/rct.py get {{ object_name }} --host={{ states("input_text.rct_ip_address") }}'
+  dummy: "echo 'dummy command'"
