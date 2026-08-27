@@ -15,6 +15,7 @@ import socket
 import select
 import time
 
+from rctclient.exceptions import FrameCRCMismatch
 from rctclient.frame import make_frame, ReceiveFrame
 from rctclient.registry import REGISTRY
 from rctclient.types import Command
@@ -106,9 +107,17 @@ def send_data(host_port: tuple[str, int], data: bytes) -> None:
 
 
 def communicate_with_server(
-    host_port, send_frame, response_data_type, retries=3, timeout=5
+    host_port, send_frame, response_data_type, expected_id=None, retries=3, timeout=5
 ):
-    """Exchange frames with the inverter and decode the response."""
+    """Exchange frames with the inverter and decode the response.
+
+    Only a complete, CRC-valid frame whose object id matches expected_id is
+    accepted. The inverter shares one stream with unsolicited frames and can
+    deliver responses meant for other connected clients (see
+    python-rctclient issue #43) — decoding the first complete frame
+    regardless of id returns values belonging to a different register.
+    Mismatched frames are discarded and reading continues until the deadline.
+    """
     for attempt in range(retries):
         print(
             f"Attempting connection to {host_port} (Attempt {attempt + 1}/{retries})..."
@@ -120,27 +129,46 @@ def communicate_with_server(
                 sock.sendall(send_frame)
                 print("*** Frame sent. Waiting for response...")
 
+                deadline = time.monotonic() + timeout
+                pending = b""
                 response_frame = ReceiveFrame()
-                buffer_size = 256
-                while not response_frame.complete():
-                    ready_read, _, _ = select.select([sock], [], [], timeout)
-                    if ready_read:
-                        buf = sock.recv(buffer_size)
-                        if buf:
-                            response_frame.consume(buf)
-                        else:
+                while time.monotonic() < deadline:
+                    if pending:
+                        chunk, pending = pending, b""
+                    else:
+                        remaining = max(0.0, deadline - time.monotonic())
+                        ready_read, _, _ = select.select([sock], [], [], remaining)
+                        if not ready_read:
+                            continue
+                        chunk = sock.recv(256)
+                        if not chunk:
                             print("ERROR: Remote host closed the connection.")
                             break
-                    else:
-                        print("ERROR: Response timeout, retrying...")
-                        break
-
-                if response_frame.complete():
-                    decoded_value = decode_value(
-                        response_data_type, response_frame.data
-                    )
+                    try:
+                        consumed = response_frame.consume(chunk)
+                    except FrameCRCMismatch as e:
+                        # Resync past the corrupt frame, keep the tail.
+                        consumed = getattr(e, "consumed_bytes", 0) or 1
+                        response_frame = ReceiveFrame()
+                        pending = chunk[consumed:]
+                        continue
+                    pending = chunk[consumed:]
+                    if not response_frame.complete():
+                        continue
+                    frame, response_frame = response_frame, ReceiveFrame()
+                    if not frame.crc_ok:
+                        continue
+                    if expected_id is not None and frame.id != expected_id:
+                        print(
+                            f"*** Ignoring frame for object 0x{frame.id:08X}"
+                            f" (expected 0x{expected_id:08X})"
+                        )
+                        continue
+                    decoded_value = decode_value(response_data_type, frame.data)
                     print(f"*** Response: {decoded_value}")
                     return decoded_value
+                else:
+                    print("ERROR: Response timeout, retrying...")
 
             except (socket.timeout, socket.gaierror, socket.error) as e:
                 print(f"ERROR: Socket issue: {e}")
@@ -226,7 +254,34 @@ def set_value(parameter: str, value: str, host: str) -> str:
     )
     send_data(host_port, frame)
 
-    return f"*** SET SUCCESS: {parameter} = {value} on {host}"
+    # Post-write verification: the RCT protocol has no write acknowledgement
+    # at all -- a lost, starved or cross-delivered frame (see the get-path
+    # validation) makes "sent" and "applied" two different things. Read the
+    # register back with id validation and compare against what we wrote.
+    time.sleep(1.0)
+    readback = communicate_with_server(
+        host_port,
+        make_frame(command=Command.READ, id=object_info.object_id),
+        object_info.response_data_type,
+        expected_id=object_info.object_id,
+    )
+    if readback is None:
+        print(f"### ERROR ### Write readback failed for {parameter} on {host}")
+        sys.exit(1)
+    if isinstance(value, bool):
+        verified = bool(readback) == value
+    elif isinstance(value, float):
+        verified = abs(float(readback) - value) <= 0.005
+    else:
+        verified = readback == value
+    if not verified:
+        print(
+            f"### ERROR ### Write UNVERIFIED: {parameter} wrote {value},"
+            f" readback {readback} on {host}"
+        )
+        sys.exit(1)
+
+    return f"*** SET VERIFIED: {parameter} = {value} (readback {readback}) on {host}"
 
 
 def get_value(parameter: str, host: str) -> str:
@@ -252,7 +307,12 @@ def get_value(parameter: str, host: str) -> str:
     host_port = (host, DEFAULT_PORT)
     object_info = REGISTRY.get_by_name(parameter)
     frame = make_frame(command=Command.READ, id=object_info.object_id)
-    result = communicate_with_server(host_port, frame, object_info.response_data_type)
+    result = communicate_with_server(
+        host_port,
+        frame,
+        object_info.response_data_type,
+        expected_id=object_info.object_id,
+    )
 
     if result is not None:
         return f"*** READ SUCCESS: {parameter} = {result}"
