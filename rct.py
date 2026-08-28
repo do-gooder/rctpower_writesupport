@@ -88,8 +88,13 @@ def validate_float(
         sys.exit(1)
 
 
-def send_data(host_port: tuple[str, int], data: bytes) -> None:
-    """Send a prepared binary frame to the inverter."""
+def send_data(host_port: tuple[str, int], data: bytes) -> bool:
+    """Send a prepared binary frame to the inverter.
+
+    Returns True on success, False on socket error / timeout, so callers can
+    surface the failure instead of reporting success for a write that never
+    reached the inverter.
+    """
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.settimeout(5)
@@ -97,10 +102,13 @@ def send_data(host_port: tuple[str, int], data: bytes) -> None:
             sock.connect(host_port)
             sock.sendall(data)
             print("*** Data sent successfully.")
+            return True
     except (socket.timeout, socket.error) as e:
         print(f"### ERROR ### Socket error: {e}")
+        return False
     except Exception as e:
         print(f"### ERROR ### Unexpected error: {e}")
+        return False
     finally:
         print("*** Socket closed.")
 
@@ -224,7 +232,11 @@ def set_value(parameter: str, value: str, host: str) -> str:
     frame = make_frame(
         command=Command.WRITE, id=object_info.object_id, payload=encoded_value
     )
-    send_data(host_port, frame)
+    if not send_data(host_port, frame):
+        # Exit non-zero so automation callers (e.g. a Home Assistant
+        # shell_command) register the failure instead of a false success.
+        print(f"### ERROR ### Write failed for {parameter} = {value} on {host}")
+        sys.exit(1)
 
     return f"*** SET SUCCESS: {parameter} = {value} on {host}"
 
@@ -256,7 +268,10 @@ def get_value(parameter: str, host: str) -> str:
 
     if result is not None:
         return f"*** READ SUCCESS: {parameter} = {result}"
-    return f"### ERROR ### Failed to read parameter '{parameter}'"
+    # Exit non-zero so callers (command_line sensors, scripts) can tell a
+    # failed read apart from a value.
+    print(f"### ERROR ### Failed to read parameter '{parameter}' on {host}")
+    sys.exit(1)
 
 
 # ============================================================================
