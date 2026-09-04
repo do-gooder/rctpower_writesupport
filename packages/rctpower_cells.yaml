@@ -1,0 +1,82 @@
+# Home Assistant package: RCT battery cell-level monitoring.
+#
+# Polls rct_cells.py every 15 minutes (one TCP connection per poll) and lifts
+# the stack/per-module aggregates into template sensors with state_class so
+# Home Assistant keeps long-term statistics. Adjust the host IP, the number
+# of modules and (optionally) add --vm-url=http://<victoriametrics>:8428 to
+# also record every single cell voltage/temperature long-term.
+#
+# Copy rct_cells.py to /config/ (next to rct.py) first.
+
+command_line:
+  - sensor:
+      name: rct_battery_cells_json
+      unique_id: rct_battery_cells_json
+      command: "python /config/rct_cells.py --host=192.168.0.99 --modules=4"
+      scan_interval: 900
+      command_timeout: 150
+      unit_of_measurement: "mV"
+      value_template: >-
+        {%- if value is defined and value[:1] == '{' -%}
+          {{ (value | from_json).cell_spread_mv }}
+        {%- else -%}unknown{%- endif -%}
+      json_attributes:
+        - cell_min_mv
+        - cell_max_mv
+        - cell_spread_mv
+        - cells_read
+        - ah_capacity
+        - soh
+        - soc
+        - battery_temp_c
+        - module_1_cycles
+        - module_2_cycles
+        - module_3_cycles
+        - module_4_cycles
+        - module_1_avg_mv
+        - module_1_spread_mv
+        - module_2_avg_mv
+        - module_2_spread_mv
+        - module_3_avg_mv
+        - module_3_spread_mv
+        - module_4_avg_mv
+        - module_4_spread_mv
+
+template:
+  - sensor:
+      - name: "RCT Cell Voltage Min"
+        unique_id: rct_cell_voltage_min
+        unit_of_measurement: "mV"
+        state_class: measurement
+        availability: "{{ state_attr('sensor.rct_battery_cells_json', 'cell_min_mv') is not none }}"
+        state: "{{ state_attr('sensor.rct_battery_cells_json', 'cell_min_mv') }}"
+      - name: "RCT Cell Voltage Max"
+        unique_id: rct_cell_voltage_max
+        unit_of_measurement: "mV"
+        state_class: measurement
+        availability: "{{ state_attr('sensor.rct_battery_cells_json', 'cell_max_mv') is not none }}"
+        state: "{{ state_attr('sensor.rct_battery_cells_json', 'cell_max_mv') }}"
+      - name: "RCT Cell Voltage Spread"
+        unique_id: rct_cell_voltage_spread
+        unit_of_measurement: "mV"
+        state_class: measurement
+        availability: "{{ state_attr('sensor.rct_battery_cells_json', 'cell_spread_mv') is not none }}"
+        state: "{{ state_attr('sensor.rct_battery_cells_json', 'cell_spread_mv') }}"
+      # Duplicate the block below per module as needed (module_2_..., etc.).
+      - name: "RCT Module 1 Cell Voltage Avg"
+        unique_id: rct_module_1_cell_voltage_avg
+        unit_of_measurement: "mV"
+        state_class: measurement
+        availability: "{{ state_attr('sensor.rct_battery_cells_json', 'module_1_avg_mv') is not none }}"
+        state: "{{ state_attr('sensor.rct_battery_cells_json', 'module_1_avg_mv') }}"
+      - name: "RCT Module 1 Cell Voltage Spread"
+        unique_id: rct_module_1_cell_voltage_spread
+        unit_of_measurement: "mV"
+        state_class: measurement
+        availability: "{{ state_attr('sensor.rct_battery_cells_json', 'module_1_spread_mv') is not none }}"
+        state: "{{ state_attr('sensor.rct_battery_cells_json', 'module_1_spread_mv') }}"
+      - name: "RCT Module 1 Cycles"
+        unique_id: rct_module_1_cycles
+        state_class: total_increasing
+        availability: "{{ state_attr('sensor.rct_battery_cells_json', 'module_1_cycles') is not none }}"
+        state: "{{ state_attr('sensor.rct_battery_cells_json', 'module_1_cycles') }}"

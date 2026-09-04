@@ -94,6 +94,12 @@ Valid Parameters:
   buf_v_control.power_reduction - External power reduction based on solar plant peak power
     Valid Range: 0.00 to 1.00, with at most two decimal places
     Default Value: 1.00
+  battery.soc_target - Current SOC target
+    Valid Range: 0.00 to 1.00, with at most two decimal places (get/set)
+  battery.soc_target_high - SOC target band upper bound (get only)
+  battery.soc_target_low - SOC target band lower bound (get only)
+  power_mng.bat_next_calib_date - Next battery calibration (unix timestamp)
+    Setting a date ~2 days in the past starts a calibration immediately
 ```
 
 ## Homeassistant Integration with pyscript (Alternative 1)
@@ -190,7 +196,43 @@ homeassistant:
 
 ![image](<images/packages_result.png>)
 
-### 
+## Battery cell monitoring (rct_cells.py)
+
+`rct_cells.py` reads **live per-cell voltages and temperatures** of every
+battery module plus stack health registers (`battery.ah_capacity`,
+`battery.soh`, `battery.soc`, per-module `battery.stack_cycles[n]`) over one
+TCP connection and prints a single JSON line:
+
+```
+python rct_cells.py --host=192.168.0.99 --modules=4
+{"cell_min_mv": 3292, "cell_max_mv": 3330, "cell_spread_mv": 38, "cells_read": 96, "ah_capacity": 16.138, "soh": 1.0, ...}
+```
+
+The undocumented `battery.cells[N]` register decodes as 24 records of 4 bytes
+per module — `[temperature_c: uint8][voltage_mv: uint16 LE][flag: uint8]`
+(verified against `battery.min_cell_voltage` / `battery.max_cell_voltage`
+and `battery.temperature` on a Power Storage 6.0).
+
+Why you want this: cell **imbalance** silently eats usable capacity (the BMS
+`ah_capacity` estimate shrinks while `soh` stays 1.0) — e.g. after a battery
+extension the new module runs at a higher SOC than the old ones and
+terminates charging for the whole stack early. Watching per-module
+averages/spreads makes that visible immediately, and long-term per-cell
+logging shows individual cell aging. A healthy pack sits below ~25 mV
+spread; ≥50 mV is worth documenting for a warranty case.
+
+- **Home Assistant**: see `packages/rctpower_cells.yaml` for a ready-made
+  command_line + template sensor package (15-min polling).
+- **Long-term per-cell logging**: add `--vm-url=http://<host>:8428` to push
+  every cell as `rct_cell_voltage_mv{module,cell}` / `rct_cell_temp_c{...}`
+  in Prometheus text format to VictoriaMetrics (or anything exposing
+  `/api/v1/import/prometheus`).
+- **Calibration on demand**: the inverter recalibrates its SOC anchor by
+  charging to 100 % (default every ~30 days). To start one right now:
+  `python rct.py set power_mng.bat_next_calib_date $(($(date +%s) - 172800)) --host=...`
+  — the battery icon shows "Charge Calib" while it runs. Balancing follows
+  the calibration and shows as SOC target 100 % for up to a few days.
+
 ## Links
 [Rctclient's documentation](https://rctclient.readthedocs.io/en/latest/index.html)
 

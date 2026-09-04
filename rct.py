@@ -67,6 +67,12 @@ Valid Parameters:
   p_rec_lim[1]                    Max. battery to grid power (0-6000)
   power_mng.use_grid_power_enable Enable/disable grid power usage (TRUE/FALSE)
   buf_v_control.power_reduction   External power reduction (0.000-1.000)
+  battery.soc_target              Current SOC target (0.00-1.00; get/set)
+  battery.soc_target_high         SOC target band upper bound (get only —
+                                  firmware output, useful for diagnostics)
+  battery.soc_target_low          SOC target band lower bound (get only)
+  power_mng.bat_next_calib_date   Next battery calibration (unix timestamp;
+                                  set ~2 days in the past to start one now)
 """)
 
 
@@ -170,6 +176,8 @@ def set_value(parameter: str, value: str, host: str) -> str:
         "p_rec_lim[1]",
         "power_mng.use_grid_power_enable",
         "buf_v_control.power_reduction",
+        "battery.soc_target",
+        "power_mng.bat_next_calib_date",
     ]
 
     if parameter not in valid_parameters:
@@ -217,6 +225,21 @@ def set_value(parameter: str, value: str, host: str) -> str:
     elif parameter == "buf_v_control.power_reduction":
         value = validate_float(parameter, value, 0.0, 1.0, decimals=3)
 
+    elif parameter == "battery.soc_target":
+        value = validate_float(parameter, value, 0.0, 1.0)
+
+    elif parameter == "power_mng.bat_next_calib_date":
+        # Unix timestamp of the next scheduled battery calibration. Setting a
+        # date ~2 days in the past starts a calibration immediately (the
+        # battery icon shows "Charge Calib" and the SOC target goes to 100 %).
+        try:
+            value = int(value)
+            if not (1_000_000_000 <= value <= 4_102_444_800):
+                raise ValueError
+        except ValueError:
+            print(f"Error: '{value}' must be a unix timestamp (2001-2100).")
+            sys.exit(1)
+
     # Prepare and send frame
     host_port = (host, DEFAULT_PORT)
     object_info = REGISTRY.get_by_name(parameter)
@@ -242,6 +265,10 @@ def get_value(parameter: str, host: str) -> str:
         "p_rec_lim[1]",
         "power_mng.use_grid_power_enable",
         "buf_v_control.power_reduction",
+        "battery.soc_target",
+        "battery.soc_target_high",
+        "battery.soc_target_low",
+        "power_mng.bat_next_calib_date",
     ]
 
     if parameter not in valid_parameters:
