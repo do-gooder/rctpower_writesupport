@@ -54,8 +54,14 @@ def show_help():
     print("""
 Usage:
   rct.py get <parameter> --host=<ip_address_or_hostname>
+  rct.py get_short <parameter> --host=<ip_address_or_hostname>
   rct.py set <parameter> <value> --host=<ip_address_or_hostname>
 
+Output:
+    get: Returns the parameter name and its value.
+    get_short: Returns only the value of the parameter.
+    set: Sets the parameter to the specified value.
+    
 Valid Parameters:
   power_mng.soc_strategy          SOC control mode (0-5)
   power_mng.soc_target_set        SOC target value (0.00-1.00)
@@ -140,6 +146,48 @@ def communicate_with_server(
                         response_data_type, response_frame.data
                     )
                     print(f"*** Response: {decoded_value}")
+                    return decoded_value
+
+            except (socket.timeout, socket.gaierror, socket.error) as e:
+                print(f"ERROR: Socket issue: {e}")
+            except Exception as e:
+                print(f"ERROR: Unexpected error: {e}")
+
+            time.sleep(1)
+    print("ERROR: All connection attempts failed.")
+    return None
+
+def communicate_with_server_short(
+    host_port, send_frame, response_data_type, retries=3, timeout=5
+):
+    """Exchange frames with the inverter and decode the response."""
+    for attempt in range(retries):
+        
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            try:
+                sock.settimeout(timeout)
+                sock.connect(host_port)
+                sock.sendall(send_frame)
+                
+                response_frame = ReceiveFrame()
+                buffer_size = 256
+                while not response_frame.complete():
+                    ready_read, _, _ = select.select([sock], [], [], timeout)
+                    if ready_read:
+                        buf = sock.recv(buffer_size)
+                        if buf:
+                            response_frame.consume(buf)
+                        else:
+                            print("ERROR: Remote host closed the connection.")
+                            break
+                    else:
+                        print("ERROR: Response timeout, retrying...")
+                        break
+
+                if response_frame.complete():
+                    decoded_value = decode_value(
+                        response_data_type, response_frame.data
+                    )                    
                     return decoded_value
 
             except (socket.timeout, socket.gaierror, socket.error) as e:
@@ -259,6 +307,36 @@ def get_value(parameter: str, host: str) -> str:
     return f"### ERROR ### Failed to read parameter '{parameter}'"
 
 
+def get_value_short(parameter: str, host: str) -> str:
+    """Read a configuration parameter from the inverter."""
+    valid_parameters = [
+        "power_mng.soc_strategy",
+        "power_mng.soc_target_set",
+        "power_mng.battery_power_extern",
+        "power_mng.soc_max",
+        "power_mng.soc_min",
+        "power_mng.soc_charge_power",
+        "power_mng.soc_charge",
+        "p_rec_lim[1]",
+        "power_mng.use_grid_power_enable",
+        "buf_v_control.power_reduction",
+    ]
+
+    if parameter not in valid_parameters:
+        print(f"Error: Invalid parameter '{parameter}'.")
+        show_help()
+        sys.exit(1)
+
+    host_port = (host, DEFAULT_PORT)
+    object_info = REGISTRY.get_by_name(parameter)
+    frame = make_frame(command=Command.READ, id=object_info.object_id)
+    result = communicate_with_server_short(host_port, frame, object_info.response_data_type)
+
+    if result is not None:
+        return f"{result}"
+    return f"### ERROR ### '"
+
+
 # ============================================================================
 # MAIN ENTRY POINT
 # ============================================================================
@@ -287,6 +365,12 @@ if __name__ == "__main__":
             print("Error: Please provide <parameter> --host=<ip>")
             sys.exit(1)
         print(get_value(args[2], host))
+
+    elif subcommand == "get_short":
+            if len(args) != 4:
+                print("Error: Please provide <parameter> --host=<ip>")
+                sys.exit(1)
+            print(get_value_short(args[2], host))
 
     else:
         print(f"Error: Unknown command '{subcommand}'.")
